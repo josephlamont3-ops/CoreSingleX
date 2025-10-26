@@ -1,0 +1,28 @@
+# ⚡ CoreSignalX
+
+**AI-Powered Market Intelligence Platform**
+
+CoreSignalX merges live market data, options activity, macro signals, and
+news sentiment into a single composite score — the **CoreScore** — and a
+simple color-coded verdict:
+🟢 Favorable 🔵 Watch 🟡 Neutral 🔴 Avoid
+
+---
+
+## 🚀 Features
+- Live stock & crypto data (Yahoo Finance / Alpha Vantage)
+- Options-flow & macro indicators (FRED)
+- Real-time news sentiment (NewsAPI)
+- Technical signals (RSI, MACD, Bollinger, Stochastic, MA Cross)
+- AI-driven CoreBrain fusion model
+- Professional Streamlit interface (Apple × Tesla aesthetic)
+- Legal disclaimer and credit to **Joseph Lamont**
+
+---
+
+## 🧩 Installation
+
+```bash
+git clone https://github.com/<your-username>/CoreSignalX.git
+cd CoreSignalX
+pip install -r requirements.txt
