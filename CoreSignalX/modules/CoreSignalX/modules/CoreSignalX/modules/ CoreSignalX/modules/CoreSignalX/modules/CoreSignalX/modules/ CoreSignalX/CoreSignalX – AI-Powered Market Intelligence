@@ -1,0 +1,90 @@
+"""
+app.py
+------------------------------------
+CoreSignalX – AI-Powered Market Intelligence Dashboard
+"""
+
+import streamlit as st
+import pandas as pd
+from modules.data_fetch import get_live_data
+from modules.corebrain import get_core_verdict
+from modules.sentiment_nlp import aggregate_sentiment
+from modules.signal_engines import generate_signal_scores
+from modules.utils import display_header, plot_price, format_score, footer
+
+# --------------------------------------------------
+# Streamlit configuration
+# --------------------------------------------------
+st.set_page_config(page_title="CoreSignalX", layout="wide")
+
+# Sidebar
+st.sidebar.image("assets/logo.png", use_column_width=True)
+st.sidebar.title("CoreSignalX")
+st.sidebar.caption("AI-Powered Market Intelligence")
+st.sidebar.markdown("---")
+
+alpha_key = st.sidebar.text_input("Alpha Vantage API Key", type="password")
+news_key = st.sidebar.text_input("NewsAPI Key", type="password")
+fred_key = st.sidebar.text_input("FRED API Key", type="password")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("**© 2025 Joseph Lamont**")
+st.sidebar.caption("Educational use only · No financial advice")
+
+# --------------------------------------------------
+# Header & Input
+# --------------------------------------------------
+display_header("CoreSignalX Smart Verdict Engine")
+
+ticker = st.text_input("🔍 Enter Stock or Crypto Symbol", "TSLA").upper()
+
+if st.button("Run Analysis"):
+    if not ticker:
+        st.warning("Please enter a valid ticker symbol.")
+    else:
+        with st.spinner(f"Fetching live data for {ticker}..."):
+            market_data = get_live_data(ticker, alpha_key, fred_key, news_key)
+
+        with st.spinner("Analyzing sentiment..."):
+            headlines = market_data.get("news", [])
+            sent = aggregate_sentiment(headlines)
+            market_data["sentiment"] = sent["sentiment"]
+
+        with st.spinner("Running technical & AI fusion..."):
+            verdict = get_core_verdict(ticker, market_data)
+
+        # --------------------------------------------------
+        # Results display
+        # --------------------------------------------------
+        st.success(f"Core Verdict for {ticker}")
+        st.markdown(f"### {verdict['label']}")
+        st.metric("CoreScore", f"{verdict['CoreScore']}/100")
+        st.markdown(verdict["summary"])
+
+        # Charts
+        df = market_data.get("price_data", pd.DataFrame())
+        if not df.empty:
+            st.plotly_chart(plot_price(df, ticker), use_container_width=True)
+
+        # Technical details
+        tech = generate_signal_scores(df)
+        st.markdown("### 🧠 Technical Breakdown")
+        st.write(pd.DataFrame([tech]))
+
+        # Sentiment summary
+        st.markdown("### 📰 Sentiment Overview")
+        st.write(f"Aggregate sentiment: {sent['sentiment']:.1f}")
+        if headlines:
+            with st.expander("Show latest headlines"):
+                for h in headlines:
+                    st.markdown(f"- {h}")
+
+        # Feature importance
+        st.markdown("### ⚙️ CoreBrain Feature Weights")
+        imp = pd.DataFrame(verdict["importance"], columns=["Feature", "Weight"])
+        st.bar_chart(imp.set_index("Feature"))
+
+# --------------------------------------------------
+# Footer
+# --------------------------------------------------
+footer()
