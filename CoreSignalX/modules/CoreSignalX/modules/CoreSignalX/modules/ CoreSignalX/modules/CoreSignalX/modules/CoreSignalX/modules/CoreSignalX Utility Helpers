@@ -1,0 +1,89 @@
+"""
+utils.py
+------------------------------------
+CoreSignalX Utility Helpers for Streamlit & Visualization
+"""
+
+import streamlit as st
+import plotly.graph_objects as go
+import pandas as pd
+
+
+# --------------------------------------------------
+#  Streamlit Header / Branding
+# --------------------------------------------------
+def display_header(title: str = "CoreSignalX Market Intelligence"):
+    """Displays a branded header across all pages."""
+    st.markdown(
+        f"""
+        <div style='background-color:#f9f9f9;
+                    padding:20px 10px;
+                    border-radius:8px;
+                    text-align:center;
+                    border:1px solid #e0e0e0;'>
+            <h2 style='color:#111;font-family:sans-serif;'>
+                ⚡ {title}
+            </h2>
+            <p style='font-size:14px;color:#555;'>
+                AI-Powered Signal Fusion for Stocks & Crypto
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("")
+
+
+# --------------------------------------------------
+#  Chart Builders
+# --------------------------------------------------
+def plot_price(df: pd.DataFrame, ticker: str = "") -> go.Figure:
+    """Basic price chart with moving averages."""
+    fig = go.Figure()
+    if df.empty:
+        return fig
+    fig.add_trace(go.Candlestick(
+        x=df.index,
+        open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"],
+        name="Price",
+    ))
+    if "MA_Short" in df.columns:
+        fig.add_trace(go.Scatter(
+            x=df.index, y=df["MA_Short"], mode="lines",
+            line=dict(width=1.5, color="blue"), name="20MA"
+        ))
+    if "MA_Long" in df.columns:
+        fig.add_trace(go.Scatter(
+            x=df.index, y=df["MA_Long"], mode="lines",
+            line=dict(width=1.5, color="gray"), name="50MA"
+        ))
+    fig.update_layout(
+        title=f"{ticker} Price Chart",
+        xaxis_rangeslider_visible=False,
+        template="plotly_white",
+        height=400,
+    )
+    return fig
+
+
+def format_score(score: float) -> str:
+    """Return emoji + label based on score thresholds."""
+    if score >= 75:
+        return f"🟢 Favorable ({score:.1f})"
+    elif score >= 60:
+        return f"🔵 Watch ({score:.1f})"
+    elif score >= 40:
+        return f"🟡 Neutral ({score:.1f})"
+    else:
+        return f"🔴 Avoid ({score:.1f})"
+
+
+# --------------------------------------------------
+#  Footer
+# --------------------------------------------------
+def footer():
+    """Consistent footer for every page."""
+    st.markdown("---")
+    st.caption(
+        "Educational use only · No financial advice · © 2025 Joseph Lamont"
+    )
